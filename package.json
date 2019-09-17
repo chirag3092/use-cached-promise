@@ -1,6 +1,6 @@
 {
   "name": "use-cached-promise",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "React hook that allows to you cached a promise factory response",
   "author": "chirag",
   "license": "MIT",
