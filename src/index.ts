@@ -49,44 +49,51 @@ const reducer = (state: any, { type, payload }: Dispatch) => {
 
 interface Options {
   cacheAdapter?:CacheAdapter
-  shouldCallPromiseFactory?: (...args: Array<any>) => boolean
+  shouldCallPromiseFactory?: (...args: any[]) => boolean
   cacheKey: string 
 }  
 
-const useCachedPromise = (apiFn: Function , options: Options, ...args: Array<any>) => {
+const useCachedPromise = (promiseFactory: (...args: any[]) => Promise<any>, options: Options, ...args: any[]) => {
   const {
     cacheAdapter,
     shouldCallPromiseFactory = () => true,
     cacheKey,
   } = options;
-  const [state, dispatch] = useReducer(reducer, initialState);
-  const { isLoading, response, status } = state;
+
+  const [{ isLoading, response, status }, dispatch] = useReducer(reducer, initialState);
 
   const shouldCall = shouldCallPromiseFactory(...args);
 
+  async function resolvePromise() {
+
+    if (cacheAdapter && await cacheAdapter.has(cacheKey)) {
+      dispatch({ type: EVENTS.API_CALLED });
+
+      const data = await cacheAdapter.get(cacheKey);
+
+      dispatch({ type: EVENTS.API_SUCCESS, payload: data });
+
+      return;
+    }
+
+    if (shouldCall) {
+      dispatch({ type: EVENTS.API_CALLED });
+
+      const data = await promiseFactory(...args);
+
+      dispatch({ type: EVENTS.API_SUCCESS, payload: data });
+
+      if (cacheAdapter) {
+        cacheAdapter.set(cacheKey, data);
+      }
+    }
+  }
+
   useEffect(
     () => {
-      if (cacheAdapter && cacheAdapter.has(cacheKey)) {
-        dispatch({ type: EVENTS.API_CALLED });
-        cacheAdapter.get(cacheKey).then(data => {
-          dispatch({ type: EVENTS.API_SUCCESS, payload: data });
-        });
-        return;
-      }
-
-      if (shouldCall) {
-        dispatch({ type: EVENTS.API_CALLED });
-        apiFn(...args)
-          .then((data: any) => {
-            dispatch({ type: EVENTS.API_SUCCESS, payload: data });
-            if (cacheAdapter) {
-              cacheAdapter.set(cacheKey, data);
-            }
-          })
-          .catch((error: Error) => {
-            dispatch({ type: EVENTS.API_FAILURE, payload: error });
-          });
-      }
+      resolvePromise().catch((error: Error) => {
+        dispatch({ type: EVENTS.API_FAILURE, payload: error });
+      });
     },
     [shouldCall, ...args],
   );
