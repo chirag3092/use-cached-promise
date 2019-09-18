@@ -64,24 +64,24 @@ const useCachedPromise = (promiseFactory: (...args: any[]) => Promise<any>, opti
 
   const shouldCall = shouldCallPromiseFactory(...args);
 
-  async function resolvePromise() {
+  async function resolvePromise({ dispatchEvent }: { dispatchEvent: (a: Dispatch) => void }) {
 
     if (cacheAdapter && await cacheAdapter.has(cacheKey)) {
-      dispatch({ type: EVENTS.API_CALLED });
+      dispatchEvent({ type: EVENTS.API_CALLED });
 
       const data = await cacheAdapter.get(cacheKey);
 
-      dispatch({ type: EVENTS.API_SUCCESS, payload: data });
+      dispatchEvent({ type: EVENTS.API_SUCCESS, payload: data });
 
       return;
     }
 
     if (shouldCall) {
-      dispatch({ type: EVENTS.API_CALLED });
+      dispatchEvent({ type: EVENTS.API_CALLED });
 
       const data = await promiseFactory(...args);
 
-      dispatch({ type: EVENTS.API_SUCCESS, payload: data });
+      dispatchEvent({ type: EVENTS.API_SUCCESS, payload: data });
 
       if (cacheAdapter) {
         cacheAdapter.set(cacheKey, data);
@@ -91,9 +91,17 @@ const useCachedPromise = (promiseFactory: (...args: any[]) => Promise<any>, opti
 
   useEffect(
     () => {
-      resolvePromise().catch((error: Error) => {
-        dispatch({ type: EVENTS.API_FAILURE, payload: error });
+      let isCancelled = false;
+
+      const dispatchEvent = (a: Dispatch) => !isCancelled && dispatch(a);
+
+      resolvePromise({ dispatchEvent }).catch((error: Error) => {
+        dispatchEvent({ type: EVENTS.API_FAILURE, payload: error });
       });
+
+      return () => {
+        isCancelled = true;
+      };
     },
     [shouldCall, ...args],
   );
