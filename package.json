@@ -1,6 +1,6 @@
 {
   "name": "use-cached-promise",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "React hook that allows to you cached a promise factory response",
   "author": "chirag",
   "license": "MIT",
@@ -29,6 +29,7 @@
     "@babel/core": "^7.0.0",
     "@babel/runtime": "^7.0.0",
     "@svgr/rollup": "^2.4.1",
+    "@testing-library/react": "^9.1.4",
     "@types/jest": "^23.1.5",
     "@types/react": "^16.8.0",
     "@types/react-dom": "^16.8.0",
@@ -45,8 +46,7 @@
     "rollup-plugin-postcss": "^1.6.2",
     "rollup-plugin-typescript2": "^0.17.0",
     "rollup-plugin-url": "^1.4.0",
-    "typescript": "^3.3.0",
-    "@testing-library/react": "^9.1.4"
+    "typescript": "^3.3.0"
   },
   "files": [
     "dist"
