@@ -21,9 +21,6 @@
     "predeploy": "cd example && yarn install && yarn run build",
     "deploy": "gh-pages -d example/build"
   },
-  "dependencies": {
-    "@testing-library/react": "^9.1.4"
-  },
   "peerDependencies": {
     "react": "^15.0.0 || ^16.0.0",
     "react-dom": "^15.0.0 || ^16.0.0"
@@ -48,7 +45,8 @@
     "rollup-plugin-postcss": "^1.6.2",
     "rollup-plugin-typescript2": "^0.17.0",
     "rollup-plugin-url": "^1.4.0",
-    "typescript": "^3.3.0"
+    "typescript": "^3.3.0",
+    "@testing-library/react": "^9.1.4"
   },
   "files": [
     "dist"
