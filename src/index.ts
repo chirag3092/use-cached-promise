@@ -65,15 +65,18 @@ const useCachedPromise = (promiseFactory: (...args: any[]) => Promise<any>, opti
   const shouldCall = shouldCallPromiseFactory(...args);
 
   async function resolvePromise({ dispatchEvent }: { dispatchEvent: (a: Dispatch) => void }) {
+   
+    if (cacheAdapter && await cacheAdapter.has(cacheKey) ) {
+      const hasKeyExpired =  await cacheAdapter.hasKeyExpired(cacheKey);
+      if(!hasKeyExpired) {
+        dispatchEvent({ type: EVENTS.API_CALLED });
+        
+        const data = await cacheAdapter.get(cacheKey);
 
-    if (cacheAdapter && await cacheAdapter.has(cacheKey)) {
-      dispatchEvent({ type: EVENTS.API_CALLED });
+        dispatchEvent({ type: EVENTS.API_SUCCESS, payload: data });
 
-      const data = await cacheAdapter.get(cacheKey);
-
-      dispatchEvent({ type: EVENTS.API_SUCCESS, payload: data });
-
-      return;
+        return;
+      }
     }
 
     if (shouldCall) {
@@ -85,6 +88,7 @@ const useCachedPromise = (promiseFactory: (...args: any[]) => Promise<any>, opti
 
       if (cacheAdapter) {
         cacheAdapter.set(cacheKey, data);
+        cacheAdapter.refreshExpiry(cacheKey);
       }
     }
   }

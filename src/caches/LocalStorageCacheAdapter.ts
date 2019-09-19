@@ -1,8 +1,26 @@
-import CacheAdapter from "../CacheAdapter";
+import CacheAdapter, { Options }  from "../CacheAdapter";
+
+const stringify = (obj: any) => {
+    try {
+        return JSON.stringify(obj);
+    }
+    catch {
+        return '';
+    }
+}
+
+const parse = (str: string) => {
+    try {
+        return JSON.parse(str);
+    }
+    catch {
+        return {};
+    }
+}
 
 export default class LocalStorgeCacheAdapter extends CacheAdapter {
-    constructor() {
-        super({ stringify: JSON.stringify, parse: JSON.parse });
+    constructor(options: Options = {}) {
+        super({ stringify: stringify, parse: parse, ...options });
     }
 
     async get(cacheKey: string) {
@@ -19,6 +37,7 @@ export default class LocalStorgeCacheAdapter extends CacheAdapter {
         const dataStringfy = this.stringify(data);
         // set key -> data in local storage
         return localStorage.setItem(cacheKey, dataStringfy);
+        
     }
 }
 
