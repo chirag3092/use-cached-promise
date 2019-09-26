@@ -67,6 +67,34 @@ function IpInfo() {
 }
 ```
 
+### with expiry cache 
+ ### If you want to cache data with expiry TIme  don't worry just call the function with expiry time check below example
+```js
+import React, { Component } from 'react'
+import useCachedPromise, { RESPONSE_STATUS, LocalStorgeCacheAdapter } from "use-cached-promise";
+const SECONDS = 1000;
+const fetchIp = () =>
+  fetch("https://httpbin.org/get")
+    .then(r => r.json())
+    .then(({ origin }) => origin);
+
+const options = {
+  cacheKey: "ipStore",
+  cacheAdapter: new LocalStorgeCacheAdapter({ maxAge: 5 * SECONDS })
+};
+
+function IpInfo() {
+  const { response, status } = useCachedPromise(fetchIp, options);
+
+  return (
+    <div className="App">
+      <h1>{status === RESPONSE_STATUS.pending && "Loading..."}</h1>
+      <h1>{status === RESPONSE_STATUS.success && `Your ip is ${response}`}</h1>
+    </div>
+  );
+}
+```
+
 
 ### Response Status types
 * idle
